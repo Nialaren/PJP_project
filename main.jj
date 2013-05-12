@@ -1,0 +1,192 @@
+/* volby generatoru */
+options {
+    DEBUG_PARSER = false;
+    STATIC = false;
+    OUTPUT_DIRECTORY = "D:/PJP/PJP/projektir";
+}
+
+/* trida analyzatoru */
+PARSER_BEGIN(Project)
+
+import ir.BlockStatement;
+import ir.*;
+import utils.IRVisitor;
+import utils.SymbolTable;
+import utils.TypeChecking;
+
+public class Project {
+    static BlockStatement program = new BlockStatement();
+    static SymbolTable table = new SymbolTable();
+    static int lineCounter = 0;
+    
+    public static void main(String args[])
+       throws ParseException
+    {
+        Project parser = new Project(System.in);
+        parser.start();
+        System.out.println(program.toString());
+        //BlockStatement program = new BlockStatement();
+        /*Error.clearErrors();
+        TypeChecking t = new TypeChecking();
+        BlockStatement program = new BlockStatement();
+        System.out.println(program.toString());
+        program.accept(t);
+        if (Error.noErrors()) {
+            System.out.println("Program is correct.");
+        }else {
+            Error.printErrors();
+        }*/
+    }
+}
+
+
+PARSER_END(Project)
+
+/* lexikalni analzator */
+SKIP :
+{
+    " " | "\r" | "\t" | "\n" 
+}
+
+SPECIAL_TOKEN : 
+{
+< SINGLE_LINE_COMMENT: "//"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > 
+}
+
+TOKEN :
+{
+    < ADD: "+" > | < SUB: "-" > | < EQ: "=" >
+|   < MUL: "*" > | < DIV: "/" > | < MOD: "mod" >
+}
+
+TOKEN :
+{
+    < CONSTANT:
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | <OCTAL_LITERAL> (["l","L"])?
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+}
+
+TOKEN :
+{
+    < SEMICOLON: ";" >
+}
+
+TOKEN :
+{
+    <STATEMENT : 
+        <IF>
+    |   <ELSE>
+    |   <WHILE>
+    |   <DO>
+    |   <END>
+    > | <#IF: "if"> | <#ELSE: "else"> | <#WHILE: "while" > 
+        | <#DO: "do"> | <#END: "end">
+}
+
+
+TOKEN :
+{
+  <TYPE : 
+    <INT>
+  | <DOUBLE>
+  | <BOOLEAN>
+  > | <#INT : "int"> | <#DOUBLE : "double"> | <#BOOLEAN : "bool">
+}
+
+TOKEN : 
+{
+  <ID : <LETTER> (<LETTER>|<DIGIT>) *>
+  | <#LETTER : ["a"-"z","A"-"Z"]>
+  | <#DIGIT :["0"-"9"]>
+}
+
+
+
+/* syntakticky analyzator */
+
+void start() : {
+lineCounter++;
+} {
+  ( assign(program) ";"
+    {
+    
+    System.out.println(program.toString());
+    }
+  )+ <EOF>
+}
+
+void assign(BlockStatement node) :{
+    Token name;
+    Token type;
+    Expression value;
+    Statement tmp;
+} 
+{
+    (type=<TYPE> name=<ID> {
+        table.declareVariable(lineCounter,0,name.toString(),type.toString());
+        })
+    |
+    LOOKAHEAD(<ID>"=")(name=<ID> "=" value = expr(){
+        tmp = new AssigmentStatement(table.getVariable(lineCounter,0,name.toString()),value);
+        node.getStatements().add(tmp);
+        System.out.println(tmp.toString());
+        })
+    |
+    value = expr()
+    {
+        System.out.println("Zbytek");
+    }
+}
+
+Expression expr() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+    BinaryExpression b;
+} {
+    e1=term() (( t="+" | t="-" ) e2=term()
+     {
+        b = new BinaryExpression(t.toString(), e1, e2);
+        System.out.println(b.toString());
+        return b;
+    } )* { return e1;}
+}   
+
+Expression term() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+    BinaryExpression b;
+} {
+    e1=factor() ((t="*" | t="/" | t="mod") e2=factor()
+    {
+        b =  new BinaryExpression(t.toString(), e1, e2);
+        System.out.println(b.toString());
+        return b;
+  } )*{return e1;}
+    
+}
+
+Expression factor() : {
+    Token t;
+    Expression e; 
+} {
+    
+     t=<ID> { return table.getVariable(lineCounter, 0, t.toString()); }
+    | t=<CONSTANT> 
+    {
+      return new Literal(t.toString());
+    }
+    | "(" e=expr() ")" 
+    {
+        return new UnaryExpression("(", new BinaryExpression(")",e,new Variable(")")));
+    }
+}
