@@ -21,6 +21,7 @@ import ir.WhileStatement;
 
 public class TypeChecking implements IRVisitor{
    
+    @Override
     public void visit(AssigmentStatement st) {
         String varType, expressionType;
         varType = st.getVariable().getType();
@@ -36,6 +37,7 @@ public class TypeChecking implements IRVisitor{
         }
     }
    
+    @Override
     public void visit(BinaryExpression exp) {
         final String left = exp.getLeft().getType(), right= exp.getRight().getType();
         if(!left.matches("ERROR") && !right.matches("ERROR"))
@@ -113,10 +115,12 @@ public class TypeChecking implements IRVisitor{
             exp.setType("ERROR");
     }
    
+    @Override
     public void visit(BlockStatement st) {
         // Nothing to do
     }
    
+    @Override
     public void visit(ConditionalExpression exp) {
         String cond = exp.getCondition().getType();
         String left = exp.getLeft().getType();
@@ -146,6 +150,7 @@ public class TypeChecking implements IRVisitor{
             exp.setType("ERROR");
     }
    
+    @Override
     public void visit(IfStatement st) {
         String cond = st.getCondition().getType();
         if(!cond.matches("ERROR"))
@@ -154,19 +159,23 @@ public class TypeChecking implements IRVisitor{
                 MyError.addError(new MyError( st.getLine(),st.getColumn(), "Bad IF condition expression.\n Expected: BOOLEAN\n Found: "+ cond)); 
     }
 
+    @Override
     public void visit(Literal exp) {
         String type = FindType(exp.getValue());
         exp.setType(type);
     }
 
+    @Override
     public void visit(PrintStatement st) {
         //NOTHING TO DO
     }
 
+    @Override
     public void visit(ReadStatement st) {
         //NOTHING TO DO
     }
 
+    @Override
     public void visit(UnaryExpression exp) {
         String type = exp.getExpression().getType();
         if(!type.matches("ERROR"))
@@ -185,10 +194,12 @@ public class TypeChecking implements IRVisitor{
             exp.setType("ERROR");
     }
 
+    @Override
     public void visit(Variable exp) {
         
     }
 
+    @Override
     public void visit(WhileStatement st) {
         String cond = st.getCondition().getType();
         if(!cond.matches("ERROR"))
