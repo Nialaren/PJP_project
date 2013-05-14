@@ -1,7 +1,9 @@
-/* volby generatoru */
+/* volby gener�toru */
 options {
     DEBUG_PARSER = false;
     STATIC = false;
+    KEEP_LINE_COLUMN = true;
+    COMMON_TOKEN_ACTION = true;
     OUTPUT_DIRECTORY = "D:/PJP/PJP/projektir";
 }
 
@@ -10,12 +12,16 @@ PARSER_BEGIN(Project)
 
 import ir.BlockStatement;
 import ir.*;
-import utils.*;
+import utils.IRVisitor;
+import utils.SymbolTable;
+import utils.TypeChecking;
+import utils.MyError;
 import java.io.*;
 
 public class Project {
     static SymbolTable table = new SymbolTable();
     static int lineCounter = 0;
+    static int columnCounter = 0;
     
     public static void main(String args[])
        throws ParseException
@@ -68,21 +74,33 @@ public class Project {
 PARSER_END(Project)
 
 /* lexikalni analzator */
+
+TOKEN_MGR_DECLS : // for counting column
+{
+    void CommonTokenAction(Token t)
+    {
+        Project.columnCounter++;
+    }
+}
+
 SKIP :
 {
-    " " | "\r" | "\t" | "\n" 
+    " " | "\r" | "\t"
 }
 
 SPECIAL_TOKEN : 
 {
 < SINGLE_LINE_COMMENT: "//"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > 
+| <NEW_LINE: "\n">{Project.lineCounter++; Project.columnCounter = 0;}
 }
+
+
 
 TOKEN :
 {
     < ADD: "+" > | < SUB: "-" > | < EQ: "=" >
 |   < MUL: "*" > | < DIV: "/" > | < MOD: "%" > | <CONCAT: ".">
-|   < AND: "&&"> | < OR: "||">  | < NOT: "!">
+|   < AND: "&&"> | < OR: "||">  | < NOT: "!"> 
 // Relational Operators
 | <REL_OPERATOR: <EQUAL> | <NOTEQUAL> | <GT> | <LT> | <GET> | <LET>>
     | <#EQUAL: "=="> | <#NOTEQUAL: "!="> | <#GT: ">"> | <#LT: "<"> 
@@ -93,11 +111,7 @@ TOKEN :
 /* LITERALS */
 TOKEN :
 {
-    <CONSTANT: <INTEGER_LITERAL> | <FLOATING_POINT_LITERAL> 
-             | <STRING_LITERAL>  | <BOOLEAN_LITERAL>
-    >
-|
-  <#INTEGER_LITERAL:
+  <INTEGER_LITERAL:
         <DECIMAL_LITERAL> (["l","L"])?
       | <HEX_LITERAL> (["l","L"])?
       | <OCTAL_LITERAL> (["l","L"])?
@@ -110,7 +124,7 @@ TOKEN :
 |
   < #OCTAL_LITERAL: "0" (["0"-"7"])* >
 |
-  <#FLOATING_POINT_LITERAL:
+  <FLOATING_POINT_LITERAL:
         (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
     //  | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
       | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
@@ -119,7 +133,7 @@ TOKEN :
 |
   < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
 |
-  <#STRING_LITERAL:
+  <STRING_LITERAL:
       "\""
       (   (~["\"","\\","\n","\r"])
         | ("\\"
@@ -131,7 +145,7 @@ TOKEN :
       )*
       "\""
   >
-| <#BOOLEAN_LITERAL:("true"|"false")>
+| <BOOLEAN_LITERAL:("true"|"false")>
 }
 
 TOKEN :
@@ -154,10 +168,10 @@ TOKEN :
 {
   <TYPE : 
     <INT>
-  | <DOUBLE>
+  | <FLOAT>
   | <BOOLEAN>
   | <STRING>
-  > | <#INT : "int"> | <#DOUBLE : "double"> | <#BOOLEAN : "boolean"> | <#STRING: "string">
+  > | <#INT : "int"> | <#FLOAT : "float"> | <#BOOLEAN : "boolean"> | <#STRING: "string">
 }
 
 
@@ -173,10 +187,11 @@ TOKEN :
 /* syntakticky analyzator */
 
 void start(BlockStatement node) : {
-lineCounter++;
 } {
     ( assign(node) ";"
         {
+            System.out.println(lineCounter);
+            System.out.println(columnCounter);
             System.out.println(node.toString());
         }
     )+ <EOF>
@@ -210,22 +225,21 @@ void assign(BlockStatement node) :{
     LOOKAHEAD(<READ>)<READ> name = <ID>
                 {
                     read = new ReadStatement();
-                    read.getVariables().add(table.getVariable(lineCounter, 0, name.toString()));
+                    read.getVariables().add(table.getVariable(lineCounter, columnCounter, name.toString()));
                 }("," var2=<ID>
                 {
-                    read.getVariables().add(table.getVariable(lineCounter, 0, var2.toString()));
+                    read.getVariables().add(table.getVariable(lineCounter, columnCounter, var2.toString()));
                 })* {node.getStatements().add(read);}
             
     |// Declaration
     (type=<TYPE> name=<ID> {
-        table.declareVariable(lineCounter,0,name.toString(),type.toString());
-        node.getStatements().add( new DeclarationStatement(table.getVariable(lineCounter,0,name.toString())));
+        table.declareVariable(lineCounter,columnCounter,name.toString(),type.toString());
+        node.getStatements().add( new DeclarationStatement(table.getVariable(lineCounter,columnCounter,name.toString())));
         })
     | // Assingment
     LOOKAHEAD(<ID>"=")(name=<ID> "=" value = expr(){
-        tmp = new AssigmentStatement(table.getVariable(lineCounter,0,name.toString()),value);
+        tmp = new AssigmentStatement(table.getVariable(lineCounter,columnCounter,name.toString()),value);
         node.getStatements().add(tmp);
-        System.out.println(tmp.toString());
         })
     | {return;}
 }
@@ -346,12 +360,24 @@ Expression factor() : {
     Token t;
     Expression e; 
 } {
-    
-     t=<ID> { return table.getVariable(lineCounter, 0, t.toString()); }
-    | t=<CONSTANT> 
+      t=<BOOLEAN_LITERAL>
+      {
+        return new Literal(Boolean.getBoolean(t.toString()));
+      }
+    | t=<ID> { return table.getVariable(lineCounter, columnCounter, t.toString()); }
+    | LOOKAHEAD("\"")t=<STRING_LITERAL>
+      {
+        return new Literal(t.toString());
+      }
+    | t=<FLOATING_POINT_LITERAL>
+      {
+        return new Literal(Float.parseFloat(t.toString()));
+      }
+    | t=<INTEGER_LITERAL> 
     {
-      return new Literal(t.image);
+        return new Literal(Integer.decode(t.toString()).intValue());
     }
+    
     | "(" e=expr() ")" 
     {
         return e;
