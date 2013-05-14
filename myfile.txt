@@ -1,0 +1,11 @@
+int a;
+a=5;
+int c;
+read a;
+print c;
+float b;
+
+b = a -true ;
+b = a +o;
+//f = -f;
+//a = !a;
