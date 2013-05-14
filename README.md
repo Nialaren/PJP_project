@@ -12,7 +12,7 @@ TO DO:
 Project.jj:
   - add statement branch (while do, if else) - complete (14.5.2013)
   - add Line and column counter - complete (14.5.2013)
-  - correct Literal creation (add right value, not only string)
+  - correct Literal creation (add right value, not only string) - complete (14.5.2013)
   - add Print and read statement - complete (14.5.2013)
   - add File reading and creating Assembler code file
 
