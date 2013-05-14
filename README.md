@@ -2,7 +2,7 @@ PJP_project
 ===========
 CHANGES:
 14.5.2013
-Class utils.Error renamed to MyError -> all references renamed in utils package (see MyError.java file)
+Class utils.Error renamed to MyError -> all references renamed in utils package (see MyError.java file)\n
 Added - MyClass.java
 Added - DeclarationStatement.java
 
