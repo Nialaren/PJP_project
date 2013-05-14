@@ -14,6 +14,7 @@ Project.jj:
   - add Line and column counter 
   - correct Literal creation (add right value, not only string)
   - add Print and read statement - complete (14.5.2013)
+  - add File reading and creating Assembler code file
 
 Other Classes:
   - implements all type checking methods
