@@ -4,7 +4,7 @@ options {
     STATIC = false;
     KEEP_LINE_COLUMN = true;
     COMMON_TOKEN_ACTION = true;
-    OUTPUT_DIRECTORY = "D:/PJP/PJP/projektir";
+    OUTPUT_DIRECTORY = "D:/GitHub/PJP_Project";
 }
 
 /* trida analyzatoru */
