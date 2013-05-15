@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package ir;
 
 import utils.IRVisitor;
@@ -35,8 +30,6 @@ public class Literal extends Expression {
 
     @Override
     public String getCode() {
-        return "push "+ value.toString();
+        return "push " + value.toString();
     }
-
-
 }

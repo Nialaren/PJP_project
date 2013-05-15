@@ -57,4 +57,9 @@ public class IfStatement extends Statement {
     public String toString() {
         return "if (" + condition.toString() + ") then " + thenPart.toString() + " else " + elsePart.toString() + " end;";
     }
+
+    @Override
+    public String getCode() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

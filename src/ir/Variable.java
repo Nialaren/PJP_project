@@ -32,5 +32,10 @@ public class Variable extends Expression{
     public String toString() {
         return name;
     }
+
+    @Override
+    public String getCode() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
    
 }

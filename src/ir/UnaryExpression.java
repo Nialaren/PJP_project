@@ -49,4 +49,9 @@ public class UnaryExpression extends Expression     {
     public String toString() {
         return operator+expression.toString();
     }
+
+    @Override
+    public String getCode() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

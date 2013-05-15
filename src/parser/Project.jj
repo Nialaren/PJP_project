@@ -4,11 +4,11 @@ options {
     STATIC = false;
     KEEP_LINE_COLUMN = true;
     COMMON_TOKEN_ACTION = true;
-    OUTPUT_DIRECTORY = "D:/GitHub/PJP_Project";
+    OUTPUT_DIRECTORY = "D:/GitHub/Parser/src/parser";
 }
 
 /* trida analyzatoru */
-PARSER_BEGIN(Project)
+PARSER_BEGIN(Parser)
 
 import ir.BlockStatement;
 import ir.*;
@@ -18,7 +18,7 @@ import utils.TypeChecking;
 import utils.MyError;
 import java.io.*;
 
-public class Project {
+public class Parser {
     static SymbolTable table = new SymbolTable();
     static int lineCounter = 0;
     static int columnCounter = 0;
@@ -32,7 +32,7 @@ public class Project {
             myFile = new File(args[0]);
         }
         else
-            myFile = new File("myFile.txt");
+            myFile = new File("../c-like_source.c");
         FileReader fr;
         if(myFile.exists())
         {
@@ -52,7 +52,7 @@ public class Project {
         // Parsing
         MyError.clearErrors();
         BlockStatement program = new BlockStatement();
-        Project parser = new Project(fr);
+        Parser parser = new Parser(fr);
         parser.start(program);
 
         // Zavirani souboru
@@ -75,11 +75,13 @@ public class Project {
         }else {
             MyError.printErrors();
         }
+
+        System.out.print(program.getCode());
     }
 }
 
 
-PARSER_END(Project)
+PARSER_END(Parser)
 
 /* lexikalni analzator */
 
@@ -87,7 +89,7 @@ TOKEN_MGR_DECLS : // for counting column
 {
     void CommonTokenAction(Token t)
     {
-        Project.columnCounter++;
+        Parser.columnCounter++;
     }
 }
 
@@ -99,7 +101,7 @@ SKIP :
 SPECIAL_TOKEN : 
 {
 < SINGLE_LINE_COMMENT: "//"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > 
-| <NEW_LINE: "\n">{Project.lineCounter++; Project.columnCounter = 0;}
+| <NEW_LINE: "\n">{Parser.lineCounter++; Parser.columnCounter = 0;}
 }
 
 

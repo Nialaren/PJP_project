@@ -51,4 +51,9 @@ public class WhileStatement extends Statement{
     public String toString() {
         return "while ("+condition.toString()+") do "+statement.toString()+" end;";
     }
+
+    @Override
+    public String getCode() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
