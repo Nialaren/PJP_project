@@ -19,3 +19,19 @@ Project.jj:
 Other Classes:
   - implements all type checking methods
   - Declare and implement code generating methods
+
+Parsable source code `c-like_source.c`
+``` c
+int a;
+a=5;
+int c;
+read a;
+print c;
+float b;
+c = 6;
+
+b = a - 1 ;
+b = a + c;
+//f = -f;
+//a = !a;
+```
