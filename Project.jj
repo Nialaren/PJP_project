@@ -26,16 +26,22 @@ public class Project {
     public static void main(String args[])
        throws ParseException
     {
-        File myFile = new File("myfile.txt");
+        File myFile;
+        if(args[0] != null)
+        {
+            myFile = new File(args[0]);
+        }
+        else
+            myFile = new File("myFile.txt");
         FileReader fr;
-        if(myFile.exists()) 
+        if(myFile.exists())
         {
             try 
             { 
                 fr = new FileReader(myFile);   
             } catch (FileNotFoundException ex) {
                     System.out.println("Nejde otevrit soubor!");
-                    return;//Logger.getLogger(FileTest.class.getName()).log(Level.SEVERE, null, ex);
+                    return;
                 }
         }
         else
@@ -43,27 +49,29 @@ public class Project {
             System.out.println("Uvedeny soubor neexistuje!");
             return;
         }
+        // Parsing
         MyError.clearErrors();
         BlockStatement program = new BlockStatement();
         Project parser = new Project(fr);
         parser.start(program);
 
-        
+        // Zavirani souboru
         try 
-            { 
-                fr.close();   
-            } catch (IOException ex) {
-                    System.out.println("Soubor nejde zavrit!");
-                    return;//Logger.getLogger(FileTest.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        { 
+            fr.close();   
+        } catch (IOException ex){
+            System.out.println("Soubor nejde zavrit!");
+            return;
+            }
 
         //tisk
         System.out.println(program.toString());
-        //BlockStatement program = new BlockStatement();
+        // Type checking
         TypeChecking t = new TypeChecking();
         program.accept(t);
         if (MyError.noErrors()) {
             System.out.println("Program is correct.");
+            //System.out.println();
         }else {
             MyError.printErrors();
         }

@@ -38,4 +38,9 @@ public class PrintStatement extends Statement{
         return sb.toString();
     }
 
+    @Override
+    public String getCode() {
+        return "print " + expressions.size() + "\n";
+    }
+
 }

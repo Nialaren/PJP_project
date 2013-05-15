@@ -19,4 +19,5 @@ public abstract class Node {
     public abstract void accept(IRVisitor visitor);
     @Override
     public abstract String toString();
+    public abstract String getCode();
 }

@@ -59,4 +59,9 @@ public class ConditionalExpression extends Expression {
         return "("+condition.toString()+")?"+left.toString()+":"+right.toString();
     }
 
+    @Override
+    public String getCode() {
+        return "ee";
+    }
+
 }

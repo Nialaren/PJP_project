@@ -39,6 +39,14 @@ public class BlockStatement extends Statement {
         return sb.toString();
     }
 
+    @Override
+    public String getCode() {
+        StringBuilder sb =new StringBuilder("\n");
+        for(Statement s : statements) sb.append(s.getCode());
+        sb.append("\n");
+        return sb.toString();
+    }
+
 
     
 }

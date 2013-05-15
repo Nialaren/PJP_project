@@ -52,4 +52,9 @@ public class AssigmentStatement extends Statement{
     public String toString() {
         return variable.getName()+" = "+expression.toString()+";";
     }
+
+    @Override
+    public String getCode() {
+         return "save " + variable.getCode() + "\n";
+    }
 }

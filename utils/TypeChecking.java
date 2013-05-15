@@ -219,4 +219,24 @@ public class TypeChecking implements IRVisitor{
             default : return "ERROR";
         }
     }
+    
+    public static String FindOperator(String operator)
+    {
+        switch(operator)
+        {
+            case "=="   : return "eq";
+            case "!="   : return "eq\nnot";
+            case ">"    : return "gt";
+            case "<"    : return "lt";
+            //case "<="   :exp.setType("BOOLEAN"); break;
+            //case ">="   :exp.setType("BOOLEAN"); break;
+            case "+"    : return "add";
+            case "-"    : return "sub";
+            case "/"    : return "div";
+            case "*"    : return "mul";
+            case "%"    : return "mod";
+            case "."    : return "concat";
+            default     : return "error";
+        }
+    }
 }

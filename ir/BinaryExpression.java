@@ -6,6 +6,7 @@
 package ir;
 
 import utils.IRVisitor;
+import utils.TypeChecking;
 
 /**
  *
@@ -54,6 +55,11 @@ public class BinaryExpression extends Expression   {
     @Override
     public String toString() {
         return left.toString()+operator+right.toString();
+    }
+
+    @Override
+    public String getCode() {
+        return left.getCode() + right.getCode() + TypeChecking.FindOperator(operator)+"\n";
     }
 
 }

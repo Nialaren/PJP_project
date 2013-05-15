@@ -33,5 +33,10 @@ public class Literal extends Expression {
         return value.toString();
     }
 
+    @Override
+    public String getCode() {
+        return "push "+ value.toString();
+    }
+
 
 }

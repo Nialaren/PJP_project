@@ -28,5 +28,10 @@ public class DeclarationStatement extends Statement {
     public String toString() {
         return var.getType() + " " + var.toString() + ";";
     }
+
+    @Override
+    public String getCode() {
+        return var.getCode();
+    }
     
 }
