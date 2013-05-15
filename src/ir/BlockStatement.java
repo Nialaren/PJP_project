@@ -47,6 +47,16 @@ public class BlockStatement extends Statement {
         sb.append("}\n");
         return sb.toString();
     }
+    
+    @Override
+    public String toString(int n, String space) {
+        StringBuilder sb = new StringBuilder("{\n");
+        for (Statement s : statements) {
+            sb.append(this.repeat(space, n) + s.toString(n+1, space)).append("\n");
+        }
+        sb.append("}\n");
+        return sb.toString();
+    }
 
     /**
      * Returns assembly code

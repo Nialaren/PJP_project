@@ -35,7 +35,7 @@ public class Variable extends Expression{
 
     @Override
     public String getCode() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "Variable not implemented yet\n";
     }
    
 }

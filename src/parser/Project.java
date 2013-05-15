@@ -44,7 +44,7 @@ public class Project implements ProjectConstants {
         }
 
         //tisk
-        System.out.println(program.toString());
+        System.out.println(program.toString(0, " "));
         //BlockStatement program = new BlockStatement();
         TypeChecking t = new TypeChecking();
         program.accept(t);
@@ -54,7 +54,6 @@ public class Project implements ProjectConstants {
             MyError.printErrors();
         }
 
-        System.out.println("ahoj");
         System.out.print(program.getCode());
     }
 

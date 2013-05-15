@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package ir;
 
 import utils.IRVisitor;
@@ -11,7 +10,7 @@ import utils.IRVisitor;
  *
  * @author beh01
  */
-public class AssigmentStatement extends Statement{
+public class AssigmentStatement extends Statement {
 
     private Variable variable;
     private Expression expression;
@@ -25,13 +24,14 @@ public class AssigmentStatement extends Statement{
         this.column = column;
     }
 
-    public int getLine(){
+    public int getLine() {
         return line;
     }
-    public int getColumn(){
+
+    public int getColumn() {
         return column;
     }
-    
+
     public Expression getExpression() {
         return expression;
     }
@@ -50,11 +50,16 @@ public class AssigmentStatement extends Statement{
 
     @Override
     public String toString() {
-        return variable.getName()+" = "+expression.toString()+";";
+        return variable.getName() + " = " + expression.toString() + ";";
+    }
+
+    @Override
+    public String toString(int n, String space) {
+        return this.repeat(space, n) + variable.getName() + " = " + expression.toString(n + 1, space) + ";";
     }
 
     @Override
     public String getCode() {
-         return "save " + variable.getCode() + "\n";
+        return "save " + variable.getCode() + "\n";
     }
 }

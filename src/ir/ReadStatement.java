@@ -41,7 +41,7 @@ public class ReadStatement extends Statement{
 
     @Override
     public String getCode() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "Reading not implemented yet\n";
     }
 
 }
