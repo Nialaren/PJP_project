@@ -1,0 +1,394 @@
+/* volby gener?toru */
+options {
+    DEBUG_PARSER = false;
+    STATIC = false;
+    KEEP_LINE_COLUMN = true;
+    COMMON_TOKEN_ACTION = true;
+    OUTPUT_DIRECTORY = "D:/GitHub/Parser/src/parser";
+}
+
+/* trida analyzatoru */
+PARSER_BEGIN(Parser)
+
+import ir.BlockStatement;
+import ir.*;
+import utils.IRVisitor;
+import utils.SymbolTable;
+import utils.TypeChecking;
+import utils.MyError;
+import java.io.*;
+
+public class Parser {
+    static SymbolTable table = new SymbolTable();
+    static int lineCounter = 0;
+    static int columnCounter = 0;
+    
+    public static void main(String args[])
+       throws ParseException
+    {
+        File myFile;
+        if(args[0] != null)
+        {
+            myFile = new File(args[0]);
+        }
+        else
+            myFile = new File("../c-like_source.c");
+        FileReader fr;
+        if(myFile.exists())
+        {
+            try 
+            { 
+                fr = new FileReader(myFile);   
+            } catch (FileNotFoundException ex) {
+                    System.out.println("Nejde otevrit soubor!");
+                    return;
+                }
+        }
+        else
+        {
+            System.out.println("Uvedeny soubor neexistuje!");
+            return;
+        }
+        // Parsing
+        MyError.clearErrors();
+        BlockStatement program = new BlockStatement();
+        Parser parser = new Parser(fr);
+        parser.start(program);
+
+        // Zavirani souboru
+        try 
+        { 
+            fr.close();   
+        } catch (IOException ex){
+            System.out.println("Soubor nejde zavrit!");
+            return;
+            }
+
+        //tisk
+        System.out.println(program.toString());
+        // Type checking
+        TypeChecking t = new TypeChecking();
+        program.accept(t);
+        if (MyError.noErrors()) {
+            System.out.println("Program is correct.");
+            //System.out.println();
+        }else {
+            MyError.printErrors();
+        }
+
+        System.out.print(program.getCode());
+    }
+}
+
+
+PARSER_END(Parser)
+
+/* lexikalni analzator */
+
+TOKEN_MGR_DECLS : // for counting column
+{
+    void CommonTokenAction(Token t)
+    {
+        Parser.columnCounter++;
+    }
+}
+
+SKIP :
+{
+    " " | "\r" | "\t"
+}
+
+SPECIAL_TOKEN : 
+{
+< SINGLE_LINE_COMMENT: "//"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > 
+| <NEW_LINE: "\n">{Parser.lineCounter++; Parser.columnCounter = 0;}
+}
+
+
+
+TOKEN :
+{
+    < ADD: "+" > | < SUB: "-" > | < EQ: "=" >
+|   < MUL: "*" > | < DIV: "/" > | < MOD: "%" > | <CONCAT: ".">
+|   < AND: "&&"> | < OR: "||">  | < NOT: "!"> 
+// Relational Operators
+| <REL_OPERATOR: <EQUAL> | <NOTEQUAL> | <GT> | <LT> | <GET> | <LET>>
+    | <#EQUAL: "=="> | <#NOTEQUAL: "!="> | <#GT: ">"> | <#LT: "<"> 
+    | <#GET: ">="> | <#LET: "<=">
+| <TERMAL_OPERATOR: "?"> | <CHOOSE_OPERATOR: ":">
+}
+
+/* LITERALS */
+TOKEN :
+{
+  <INTEGER_LITERAL:
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | <OCTAL_LITERAL> (["l","L"])?
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+ 
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+|
+  <FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+    //  | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  <STRING_LITERAL:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+  >
+| <BOOLEAN_LITERAL:("true"|"false")>
+}
+
+TOKEN :
+{
+    < SEMICOLON: ";" >
+}
+
+TOKEN :
+{
+    <STATEMENT : 
+        <IF>
+    |   <WHILE>
+    > | <#IF: "if"> | <ELSE: "else"> | <#WHILE: "while" > 
+        | <DO: "do"> | <END: "end"> | <THEN: "then">
+    | <PRINT: "print"> | <READ: "read">
+}
+
+
+TOKEN :
+{
+  <TYPE : 
+    <INT>
+  | <FLOAT>
+  | <BOOLEAN>
+  | <STRING>
+  > | <#INT : "int"> | <#FLOAT : "float"> | <#BOOLEAN : "boolean"> | <#STRING: "string">
+}
+
+
+TOKEN : 
+{
+  <ID : <LETTER> (<LETTER>|<DIGIT>) *>
+  | <#LETTER : ["a"-"z","A"-"Z"]>
+  | <#DIGIT :["0"-"9"]>
+}
+
+
+
+/* syntakticky analyzator */
+
+void start(BlockStatement node) : {
+} {
+    ( assign(node) ";"
+        {
+            //System.out.println(node.toString());
+        }
+    )+ <EOF>
+   
+}
+
+void assign(BlockStatement node) :{
+    Token name;
+    Token var2;
+    Token type;
+    Expression value;
+    Expression e;
+    Statement tmp;
+    PrintStatement print;
+    ReadStatement read;
+} 
+{
+    // Statement
+    LOOKAHEAD(<STATEMENT>) statement(node)
+    |//print
+    LOOKAHEAD(<PRINT>)<PRINT> e = expr()
+            {
+                print = new PrintStatement();
+                print.getExpressions().add(e);
+            }
+        ("," value = expr()
+        {
+            print.getExpressions().add(value);
+        })* {node.getStatements().add(print);} 
+    |//read
+    LOOKAHEAD(<READ>)<READ> name = <ID>
+                {
+                    read = new ReadStatement();
+                    read.getVariables().add(table.getVariable(lineCounter, columnCounter, name.toString()));
+                }("," var2=<ID>
+                {
+                    read.getVariables().add(table.getVariable(lineCounter, columnCounter, var2.toString()));
+                })* {node.getStatements().add(read);}
+            
+    |// Declaration
+    (type=<TYPE> name=<ID> {
+        table.declareVariable(lineCounter,columnCounter,name.toString(),type.toString());
+        node.getStatements().add( new DeclarationStatement(table.getVariable(lineCounter,columnCounter,name.toString())));
+        })
+    | // Assingment
+    LOOKAHEAD(<ID>"=")(name=<ID> "=" value = expr(){
+        tmp = new AssigmentStatement(table.getVariable(lineCounter,columnCounter,name.toString()),value, lineCounter, columnCounter);
+        node.getStatements().add(tmp);
+        })
+    | {return;}
+}
+
+void statement(BlockStatement node) :
+{
+    Expression cond;
+    BlockStatement tmp1 = new BlockStatement();
+    BlockStatement tmp2 = new BlockStatement();  
+}{
+    //<WHILE> <DO> <END>
+    LOOKAHEAD(<STATEMENT>"(")    
+    (<STATEMENT> "(" cond = expr()")"<DO> (assign(tmp1)";")+ <END>
+    {
+        node.getStatements().add(new WhileStatement(tmp1, cond, lineCounter, columnCounter));
+    })
+    |    
+    // IF ELSE END
+    LOOKAHEAD(3)
+    <STATEMENT> cond = expr()<THEN> (assign(tmp1)";")+
+        (<ELSE> (assign(tmp2)";")+ )? <END>
+        {
+            node.getStatements().add(new IfStatement(cond, tmp1, tmp2, lineCounter, columnCounter));
+        }
+    /*<END> // pro pripadne odstraneni else
+    {
+        node.getStatements().add(new IfStatement(cond, tmp1, tmp2));
+    }*/   
+}
+
+// MAIN EXPR
+Expression expr() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+    Expression e3;
+} {
+    LOOKAHEAD(exprOR()"?")
+    (e1= exprOR() "?" e2 = expr() ":" e3 = expr() 
+    {
+        return new ConditionalExpression(e1, e2, e3, lineCounter, columnCounter);
+    })
+    |
+    e1 = exprOR() {return e1;}
+}
+// OR Expr
+Expression exprOR() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+} {
+    e1=exprAnd() (( t="||"  ) e2=expr()
+     {
+        return new BinaryExpression(t.toString(), e1, e2, lineCounter, columnCounter);
+    } )? { return e1;}
+}
+
+// AND && EXPR   
+Expression exprAnd() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+} {
+    e1=exprRel() (( t="&&" ) e2=exprAnd()
+     {
+        return new BinaryExpression(t.toString(), e1, e2, lineCounter, columnCounter);
+    } )? { return e1;}
+}
+// RELATIONAL EXPR  
+Expression exprRel() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+} {
+    e1=exprMath() (( t=<REL_OPERATOR>  ) e2=exprRel()
+     {
+        return new BinaryExpression(t.toString(), e1, e2, lineCounter, columnCounter);
+    } )? { return e1;}
+}
+// MATH EXPR
+Expression exprMath() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+} {
+    e1=term() (( t="+" | t="-" | t="." ) e2=exprMath()
+     {
+        return new BinaryExpression(t.toString(), e1, e2, lineCounter, columnCounter);
+    } )? { return e1;}
+}   
+// TERM
+Expression term() : { 
+    Token t;
+    Expression e1;
+    Expression e2;
+} {
+    e1=Uterm() ((t="*" | t="/" | t="%" ) e2=term()
+    {
+        return new BinaryExpression(t.toString(), e1, e2, lineCounter, columnCounter);
+  } )?{return e1;}    
+}
+// UNARY OPERATOR
+Expression Uterm() : { 
+    Token t;
+    Expression e1;
+} {
+    (t="!" | t="-") e1=factor()
+    {
+        return new UnaryExpression(t.toString(), e1, lineCounter, columnCounter);
+    }
+    | e1 = factor()
+    {
+        return e1;
+    }
+}
+// SYMBOL
+Expression factor() : {
+    Token t;
+    Expression e; 
+} {
+      t=<BOOLEAN_LITERAL>
+      {
+        return new Literal(Boolean.getBoolean(t.toString()));
+      }
+    | t=<ID> { return table.getVariable(lineCounter, columnCounter, t.toString()); }
+    | t=<STRING_LITERAL>
+      {
+        return new Literal(t.toString());
+      }
+    | t=<FLOATING_POINT_LITERAL>
+      {
+        return new Literal(Float.parseFloat(t.toString()));
+      }
+    | t=<INTEGER_LITERAL> 
+    {
+        return new Literal(Integer.decode(t.toString()).intValue());
+    }
+    
+    | "(" e=expr() ")" 
+    {
+        return e;
+        //return new UnaryExpression("(", new BinaryExpression(")",e,new Variable(")")));
+    }
+}
