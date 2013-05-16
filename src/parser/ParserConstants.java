@@ -155,7 +155,7 @@ public interface ParserConstants {
     "\"int\"",
     "\"float\"",
     "\"boolean\"",
-    "\"string\"",
+    "<STRING>",
     "<ID>",
     "<LETTER>",
     "<DIGIT>",

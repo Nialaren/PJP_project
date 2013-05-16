@@ -20,7 +20,7 @@ public class Parser implements ParserConstants {
             myFile = new File(args[0]);
         }
         else {
-            myFile = new File("./c-like_source.c");
+            myFile = new File("./t1.c");
         }
 
         FileReader fr;
@@ -60,9 +60,9 @@ public class Parser implements ParserConstants {
             MyError.printErrors();
             return;
         }
-        System.out.println(program.getCode());
+        //System.out.println(program.getCode());
         // Zapis do souboru
-        /*
+
         File output = new File("Output.asm");
         try {
             output.createNewFile();
@@ -77,14 +77,14 @@ public class Parser implements ParserConstants {
             System.err.printf("Neocekava chyba u souboru: {0}", output.getName());
             return;
         }
-        
-        fw.write(program.getCode());
-        try { 
-            fw.close();   
+
+        try {
+            fw.write(program.getCode());
+            fw.close();
         } catch (IOException ex) {
         System.err.printf("Soubor nelze zavrit!");
             return;
-        }*/
+        }
     }
 
 /* syntakticky analyzator */

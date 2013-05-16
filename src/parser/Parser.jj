@@ -71,9 +71,9 @@ public class Parser {
             MyError.printErrors();
             return;
         }
-        System.out.println(program.getCode());
+        //System.out.println(program.getCode());
         // Zapis do souboru
-        /*
+        
         File output = new File("Output.asm");
         try {
             output.createNewFile();
@@ -89,13 +89,13 @@ public class Parser {
             return;
         }
         
-        fw.write(program.getCode());
-        try { 
+        try {
+            fw.write(program.getCode());
             fw.close();   
         } catch (IOException ex) {
         System.err.printf("Soubor nelze zavrit!");
             return;
-        }*/
+        }
     }
 }
 
