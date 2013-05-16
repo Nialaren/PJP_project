@@ -5,6 +5,7 @@
 package ir;
 
 import utils.IRVisitor;
+import utils.TypeChecking;
 
 /**
  *
@@ -54,6 +55,12 @@ public class UnaryExpression extends Expression {
 
     @Override
     public String getCode() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        StringBuilder output = new StringBuilder();
+
+        output.append(expression.getCode());
+        output.append("SAVE ").append(this.id).append("\n");
+        output.append(TypeChecking.FindOperator(operator)).append(" ").append(this.id).append("\n");
+
+        return output.toString();
     }
 }
