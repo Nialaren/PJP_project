@@ -45,3 +45,17 @@ else
 print "Podminka nefunguje";
 end;
 ```
+
+While cyclus
+```
+print "Cyklus";
+
+int i;
+i=0;
+while(i>5)
+do
+print "pocitadlo je: ";
+print i;
+i=i+1;
+end;
+```
