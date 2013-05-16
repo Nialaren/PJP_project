@@ -35,3 +35,13 @@ b = a + c;
 //f = -f;
 //a = !a;
 ```
+
+IF Statement
+``` c
+if 3<4
+then
+print "Podminka funguje";
+else
+print "Podminka nefunguje";
+end;
+```
