@@ -5,6 +5,7 @@
 package ir;
 
 import utils.IRVisitor;
+import utils.JumpCounter;
 
 /**
  *
@@ -16,6 +17,8 @@ public class IfStatement extends Statement {
     private BlockStatement thenPart, elsePart;
     private int line;
     private int column;
+    private int tLabel;
+    private int fLabel;
 
     public IfStatement(Expression condition, BlockStatement thenPart, BlockStatement elsePart, int line, int column) {
         this.condition = condition;
@@ -23,6 +26,8 @@ public class IfStatement extends Statement {
         this.elsePart = elsePart;
         this.line = line;
         this.column = column;
+        this.tLabel = JumpCounter.get();
+        this.fLabel = JumpCounter.get();
     }
 
     public int getLine(){
@@ -60,6 +65,18 @@ public class IfStatement extends Statement {
 
     @Override
     public String getCode() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        StringBuilder output = new StringBuilder();
+
+        output.append(condition.getCode());
+        output.append("FJMP " + this.fLabel + "\n");
+        output.append(thenPart.getCode());
+        
+        output.append("JMP " + this.tLabel + "\n");
+        output.append("LABEL " + this.fLabel + "\n");
+        output.append(elsePart.getCode());
+        
+        output.append("LABEL " + this.tLabel + "\n");
+        
+        return output.toString();        
     }
 }
