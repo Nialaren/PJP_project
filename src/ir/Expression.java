@@ -10,7 +10,7 @@ public abstract class Expression extends Node {
     //posible types INT, FLOAT, BOOLEAN, STRING, ERROR
 
     private String type;
-    protected int id;
+    protected int id = 0;
 
     public Expression() {
         this.id = VariableCounter.get();
@@ -31,5 +31,4 @@ public abstract class Expression extends Node {
     public int getId() {
         return this.id;
     }
-;
 }
