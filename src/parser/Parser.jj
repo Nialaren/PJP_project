@@ -4,7 +4,7 @@ options {
     STATIC = false;
     KEEP_LINE_COLUMN = true;
     COMMON_TOKEN_ACTION = true;
-    OUTPUT_DIRECTORY = "D:/GitHub/Parser/src/parser";
+    OUTPUT_DIRECTORY = "D:/GitHub/PJP_Project/src/parser";
 }
 
 /* trida analyzatoru */
@@ -27,26 +27,23 @@ public class Parser {
        throws ParseException
     {
         File myFile;
-        if(args[0] != null)
-        {
+        /*if(args[0] != null) {
             myFile = new File(args[0]);
         }
-        else
-            myFile = new File("../c-like_source.c");
+        else {*/
+            myFile = new File("./c-like_source.c");
+        //}
+
         FileReader fr;
-        if(myFile.exists())
-        {
-            try 
-            { 
+        if(myFile.exists()){
+            try { 
                 fr = new FileReader(myFile);   
             } catch (FileNotFoundException ex) {
-                    System.out.println("Nejde otevrit soubor!");
+                    System.err.printf("Nelze otevrit soubor!");
                     return;
-                }
-        }
-        else
-        {
-            System.out.println("Uvedeny soubor neexistuje!");
+            }
+        } else {
+            System.err.printf("Uvedeny soubor neexistuje!");
             return;
         }
         // Parsing
@@ -56,13 +53,12 @@ public class Parser {
         parser.start(program);
 
         // Zavirani souboru
-        try 
-        { 
+        try { 
             fr.close();   
-        } catch (IOException ex){
-            System.out.println("Soubor nejde zavrit!");
+        } catch (IOException ex) {
+            System.err.printf("Soubor nelze zavrit!");
             return;
-            }
+        }
 
         //tisk
         System.out.println(program.toString());
@@ -70,13 +66,36 @@ public class Parser {
         TypeChecking t = new TypeChecking();
         program.accept(t);
         if (MyError.noErrors()) {
-            System.out.println("Program is correct.");
-            //System.out.println();
-        }else {
+            System.out.println("Program je v poradku.");
+        } else {
             MyError.printErrors();
+            return;
         }
-
-        System.out.print(program.getCode());
+        System.out.println(program.getCode());
+        // Zapis do souboru
+        /*
+        File output = new File("Output.asm");
+        try {
+            output.createNewFile();
+        } catch (IOException ex) {
+            System.err.printf("Nelze vytvorit soubor: {0}", output.getName());
+            return;
+        }
+        FileWriter fw;
+        try {
+            fw = new FileWriter(output);
+        } catch (IOException ex) {
+            System.err.printf("Neocekava chyba u souboru: {0}", output.getName());
+            return;
+        }
+        
+        fw.write(program.getCode());
+        try { 
+            fw.close();   
+        } catch (IOException ex) {
+        System.err.printf("Soubor nelze zavrit!");
+            return;
+        }*/
     }
 }
 
@@ -389,6 +408,5 @@ Expression factor() : {
     | "(" e=expr() ")" 
     {
         return e;
-        //return new UnaryExpression("(", new BinaryExpression(")",e,new Variable(")")));
     }
 }
