@@ -27,12 +27,12 @@ public class Parser {
        throws ParseException
     {
         File myFile;
-        /*if(args[0] != null) {
+        if(args.length > 0) {
             myFile = new File(args[0]);
         }
-        else {*/
+        else {
             myFile = new File("./c-like_source.c");
-        //}
+        }
 
         FileReader fr;
         if(myFile.exists()){
@@ -174,7 +174,7 @@ TOKEN :
       )*
       "\""
   >
-| <BOOLEAN_LITERAL:("true"|"false")>
+| <BOOLEAN_LITERAL:("True"|"False"|"true"|"false" )>
 }
 
 TOKEN :
@@ -200,7 +200,7 @@ TOKEN :
   | <FLOAT>
   | <BOOLEAN>
   | <STRING>
-  > | <#INT : "int"> | <#FLOAT : "float"> | <#BOOLEAN : "boolean"> | <#STRING: "string">
+  > | <#INT : "int"> | <#FLOAT : "float"> | <#BOOLEAN : "boolean"> | <#STRING: ("string"|"String")>
 }
 
 

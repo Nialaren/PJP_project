@@ -16,12 +16,12 @@ public class Parser implements ParserConstants {
        throws ParseException
     {
         File myFile;
-        /*if(args[0] != null) {
+        if(args.length > 0) {
             myFile = new File(args[0]);
         }
-        else {*/
-            myFile = new File("./t1.c");
-        //}
+        else {
+            myFile = new File("./c-like_source.c");
+        }
 
         FileReader fr;
         if(myFile.exists()){
