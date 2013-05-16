@@ -62,7 +62,15 @@ public class ConditionalExpression extends Expression {
 
     @Override
     public String getCode() {
-        return "ee";
+        // todo: jumps
+        StringBuilder output = new StringBuilder();
+
+        output.append(condition.getCode());
+        output.append("SAVE ").append(this.id).append("\n");
+        output.append(left.getCode());
+        output.append(right.getCode());
+
+        return output.toString();
     }
 
 }
