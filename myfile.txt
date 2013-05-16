@@ -1,11 +1,13 @@
 int a;
-a=5;
+int b;
 int c;
-read a;
-print c;
-float b;
 
-b = a -true ;
-b = a +o;
-//f = -f;
-//a = !a;
+a=5;
+//read a;
+b=3+4;
+
+c=a*b;
+
+print a;
+print b;
+print c;

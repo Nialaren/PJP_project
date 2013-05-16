@@ -1,9 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package ir;
+
+import utils.VariableCounter;
 
 /**
  *
@@ -11,8 +8,12 @@ package ir;
  */
 public abstract class Expression extends Node {
     //posible types INT, FLOAT, BOOLEAN, STRING, ERROR
+
     private String type;
+    protected int id;
+
     public Expression() {
+        this.id = VariableCounter.get();
     }
 
     public String getType() {
@@ -22,5 +23,13 @@ public abstract class Expression extends Node {
     public void setType(String type) {
         this.type = type;
     }
-  
+
+    public String getTypeCode() {
+        return type.substring(0, 1);
+    }
+
+    public int getId() {
+        return this.id;
+    }
+;
 }

@@ -30,6 +30,6 @@ public class Literal extends Expression {
 
     @Override
     public String getCode() {
-        return "push " + value.toString();
+        return "push " + this.getTypeCode() + value.toString() + "\n";
     }
 }

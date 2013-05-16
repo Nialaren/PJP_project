@@ -19,6 +19,7 @@ public class ConditionalExpression extends Expression {
     
 
     public ConditionalExpression(Expression condition, Expression left, Expression right, int line, int column) {
+        super();
         this.condition = condition;
         this.left = left;
         this.right = right;

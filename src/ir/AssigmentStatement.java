@@ -55,11 +55,16 @@ public class AssigmentStatement extends Statement {
 
     @Override
     public String toString(int n, String space) {
-        return this.repeat(space, n) + variable.getName() + " = " + expression.toString(n + 1, space) + ";";
+        return this.repeat(space, n) + variable.getName() + " = " + expression.toString() + ";";
     }
 
     @Override
     public String getCode() {
-        return "save " + variable.getCode() + "\n";
+        StringBuilder output = new StringBuilder();
+
+        output.append(expression.getCode());
+        output.append("SAVE " + variable.getId() + "\n");
+
+        return output.toString();
     }
 }
